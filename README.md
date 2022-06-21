@@ -15,7 +15,7 @@ Query hashes are strings that let Instagram's API what kind of resources the cli
 ### Required headers
 THe required headers are the thing Instagram looks at to tell if a request has to be server or not. The most important ones are ``X-Mid``, ``X-CSRFToken``, ``X-IG-App-ID`` and ``X-ASBD-ID``.
 
-``X-Mid``: It's a string that can be represented as a list of 8 elements. Each of them is an unsigned int written on 32 bits (2^32). Once you have 8 uint32 generated "randomly", they are all converted into base 36 (``0123456789abcdefghijklmnopqrstuvwxyz``) and then concatenated each others. The way to generate this string comes from the ``ConsumerLibCommons.js`` but the string itself is not hard-coded.
+``X-Mid``: It's a string that can be represented as a list of 8 elements. Each of them is an unsigned int written on 32 bits (2^32). Once you have 8 uint32 generated "randomly", they are all converted into base 36 (``0123456789abcdefghijklmnopqrstuvwxyz``) and then concatenated together. The way to generate this string comes from the ``ConsumerLibCommons.js`` but the string itself is not hard-coded.
 
 ``X-CSRFToken`` : When you go on Instagram, specifically in a user page, Instagram' server collect some of your data and place them into a json object called ``sharedData``. This data is then sent to the client and placed at ``window._sharedData``. Finally, you can found the ``csrf_token`` key, that contains the value of the header, at ``window._sharedData["config"]["csrf_token"]``. To get the ``sharedData`` object, I also had to use regex.
 
