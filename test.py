@@ -12,6 +12,7 @@ def main(ctx: Context = None, target: str = None):
     stream.close()
 
 if __name__ == "__main__":
-    ctx = Context()
-    ctx.load("kaguramiko__")
-    main(ctx)
+    target = "kaguramiko__"
+    # ctx = Context()
+    # ctx.load()
+    main(None, target)

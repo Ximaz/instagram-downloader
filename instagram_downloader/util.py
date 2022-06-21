@@ -45,8 +45,12 @@ def generate_x_mid() -> str:
 
 def export_required_headers(target: str, consumer_lib_commons: str) -> dict:
     window_shared_data = None
-    required_headers = {"X-Mid": None,
-                        "X-CSRFToken": None, "X-IG-App-ID": None}
+    required_headers = {
+        "X-Mid": None,
+        "X-CSRFToken": None,
+        "X-IG-App-ID": None,
+        "X-ASBD-ID": None
+    }
     main_page = requests.get(instagram_target_url.format(
         target), headers=headers).text
     window_shared_data_match = re.search(
@@ -66,6 +70,11 @@ def export_required_headers(target: str, consumer_lib_commons: str) -> dict:
         raise ValueError("RegEx for x-ig-app-id must be reworked.")
     x_ig_app_id = x_ig_app_id[1]
     required_headers["X-IG-App-ID"] = x_ig_app_id
+    x_asbd_id = re.search(x_asbd_id_regex, consumer_lib_commons, re.M)
+    if not x_asbd_id:
+        raise ValueError("RegEx for x-asbd-id must be reworked.")
+    x_asbd_id = x_asbd_id[1]
+    required_headers["X-ASBD-ID"] = x_asbd_id
     return required_headers
 
 

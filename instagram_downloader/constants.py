@@ -18,7 +18,6 @@ headers = {
     "Cache-Control": "no-cache",
     "X-Requested-With": "XMLHttpRequest",
     "X-IG-WWW-Claim": "0",
-    "X-ASBD-ID": "198387"
 }
 base_36 = string.digits + string.ascii_letters
 instagram_main_url = "https://www.instagram.com"
@@ -26,6 +25,9 @@ instagram_graphql_url = "{}/graphql/query/".format(instagram_main_url)
 instagram_target_url = instagram_main_url + "/{}/channel/?hl=fr"
 consumer_lib_regex = r"(\/static\/bundles\/es6\/ConsumerLibCommons\.js\/[a-f0-9]+\.js)"
 query_kinds_regex = dict(
-    posts=r"queryId:\"([a-f0-9]{32})\"", stories=r"const _=\"([a-f0-9]{32})\"")
+    posts=r"queryId:\"([a-f0-9]{32})\"",
+    stories=r"const _=\"([a-f0-9]{32})\""
+)
+x_asbd_id_regex = r"ASBD_ID='(\d+)'"
 x_ig_app_id_regex = r"instagramWebDesktopFBAppId='(\d+)'"
 window_shared_data_regex = r"^<script type=\"text\/javascript\">window\._sharedData = ({.*});<\/script>$"
