@@ -1,3 +1,4 @@
+import os
 import json
 from instagram_downloader import *
 
@@ -7,13 +8,16 @@ def main(ctx: Context = None, target: str = None):
     if ctx is None:
         ctx = Context(target)
         ctx.export()
+    output = "urls.json"
     urls = []
+    if os.path.exists(output):
+        urls = json.load(open(output, 'r'))
     media_exporter = MediaExporter(ctx)
-    after = "QVFDZVJaRHNKZ2pGVDNDOUwxZF9MdjNSeFVZVVBZa01oNU9lLS1XTnhYWXpWWVhEX0V6RGV0LVZ1eWttV1ZQbnVBNkhaa1J3WThaeUFqU0RSaFBGdUJyWg=="
+    after = "QVFBS3JZbFRocU9HVF80dmxlbzhmdzc1aHJheTczRGVlVVlLclZNbXhxRGdFbFA2SF9nWjhIaHFSWVBnaS16LVVJZlFTQzcxZFk4TVF2S3hrclNuR3lpVg=="
     while True:
         media_item = media_exporter.export(after=after)
         urls.extend(media_item.urls)
-        json.dump(urls, open("urls.json", "w+"))
+        json.dump(urls, open(output, "w+"))
         if after == media_item.after:
             break
         after = media_item.after

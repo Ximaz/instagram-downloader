@@ -65,7 +65,7 @@ class MediaExporter:
             else:
                 print("Unknowned node type : {}\n{}\n\n".format(node_type, json.dumps(node)))
         media_item = MediaItem(links, after)
-        time.sleep(delay_between_graphql_requests)
+        time.sleep(delay)
         return media_item
 
 class MediaExporterV2:
@@ -90,16 +90,6 @@ class MediaExporterV2:
     def __make_headers(self):
         headers = self.ctx.headers
         headers["Host"] = "i.instagram.com"
-        headers["Accept"] = "*/*"
-        headers["Origin"] = "https://www.instagram.com"
-        headers["Referer"] = "https://www.instagram.com/"
-        headers["Sec-Fetch-Dest"] = "empty"
-        headers["Sec-Fetch-Mode"] = "cors"
-        headers["Sec-Fetch-Site"] = "same-site"
-        headers["TE"] = "trailers"
-        del headers["Upgrade-Insecure-Requests"]
-        del headers["Sec-Fetch-User"]
-        del headers["X-Requested-With"]
         return headers
 
     def export(self, first: int = 3, after: str = None) -> MediaItem:
@@ -124,5 +114,5 @@ class MediaExporterV2:
             elif "image_versions2" in node:
                 links.append(self.__handle_candidate(node))
         media_item = MediaItem(links, after)
-        time.sleep(delay_between_graphql_requests)
+        time.sleep(delay)
         return media_item

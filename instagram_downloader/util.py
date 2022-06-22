@@ -46,10 +46,12 @@ def generate_x_mid() -> str:
 def export_required_headers(target: str, consumer_lib_commons: str) -> dict:
     window_shared_data = None
     required_headers = {
-        "X-Mid": None,
+        "X-Mid": generate_x_mid(),
         "X-CSRFToken": None,
         "X-IG-App-ID": None,
         "X-ASBD-ID": None,
+        "X-Web-Device-ID": None,
+        "X-Instagram-AJAX": None,
         "Cookie": None
     }
     main_page = requests.get(instagram_target_url.format(
@@ -65,7 +67,8 @@ def export_required_headers(target: str, consumer_lib_commons: str) -> dict:
     except json.decoder.JSONDecodeError:
         raise ValueError("Window shared data found but wrong format.")
     required_headers["X-CSRFToken"] = window_shared_data["config"]["csrf_token"]
-    required_headers["X-Mid"] = generate_x_mid()
+    required_headers["X-Web-Device-ID"] = window_shared_data["device_id"]
+    required_headers["X-Instagram-AJAX"] = window_shared_data["rollout_hash"]
     x_ig_app_id = re.search(x_ig_app_id_regex, consumer_lib_commons, re.M)
     if not x_ig_app_id:
         raise ValueError("RegEx for x-ig-app-id must be reworked.")
@@ -74,9 +77,8 @@ def export_required_headers(target: str, consumer_lib_commons: str) -> dict:
     x_asbd_id = re.search(x_asbd_id_regex, consumer_lib_commons, re.M)
     if not x_asbd_id:
         raise ValueError("RegEx for x-asbd-id must be reworked.")
-    x_asbd_id = x_asbd_id[1]
-    required_headers["X-ASBD-ID"] = x_asbd_id
-    required_headers["Cookie"] = "csrftoken={}; mid={}; ig_did={}".format(required_headers["X-CSRFToken"], required_headers["X-Mid"], window_shared_data["device_id"])
+    required_headers["X-ASBD-ID"] = x_asbd_id[1]
+    required_headers["Cookie"] = "csrftoken={}; mid={}; ig_did={}".format(required_headers["X-CSRFToken"], required_headers["X-Mid"], required_headers["X-Web-Device-ID"])
     return required_headers
 
 
@@ -92,11 +94,4 @@ def export_query_hashes(consumer_lib_commons: str) -> list:
 
 def export_user_id(target: str, headers: dict) -> str:
     url = "{}/{}/?__a=1&__d=dis".format(instagram_main_url, target)
-    headers["Accept"] = "*/*"
-    headers["Sec-Fetch-Dest"] = "empty"
-    headers["Sec-Fetch-Mode"] = "cors"
-    headers["Sec-Fetch-Site"] = "same-origin"
-    headers["TE"] = "trailers"
-    del headers["Upgrade-Insecure-Requests"]
-    del headers["Sec-Fetch-User"]
     return requests.get(url, headers=headers).json()["graphql"]["user"]["id"]

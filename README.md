@@ -23,5 +23,18 @@ THe required headers are the thing Instagram looks at to tell if a request has t
 
 ``X-IG-App-ID`` and ``X-ASBD-ID`` : Their value are hard-coded in ``ConsumerLibCommons.js``. Regexes iare enough to get them.
 
+# Ratelimits
+According to [Bibliogram Docs](https://git.sr.ht/~cadence/bibliogram-docs/tree/master/docs/Instagram%20rate%20limits.md#specifics), the Instagram's GraphQL API has a ratelimit of 200 requests for 11 minutes, which makes around 17 requests per minute, so almost a request for 4 seconds. Find the maths below :
+
+```python
+>>> 200 / 11
+18.181818181818183 # 17 requests at lowest.
+>>> 60 / 17
+3.5294117647058822 # 4 seconds at highest.
+>>>
+```
+
+However, no information was found nowadays about the user page itself, the ``Context`` object was made to tackle this problem.
+
 # Thanks
 Thanks for reading, hope you liked the project and the way I describe the Instagram API's way to work. Please, leave a star before going. :)
