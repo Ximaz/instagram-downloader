@@ -15,8 +15,10 @@ class Context:
         # No error raised to be able to use ``load`` function.
         if self.__target:
             self.__consumer_lib_commons = export_consumer_lib(target)
-            self.__query_hashes = export_query_hashes(self.__consumer_lib_commons)
-            self.__required_headers = export_required_headers(target, self.__consumer_lib_commons)
+            self.__query_hashes = export_query_hashes(
+                self.__consumer_lib_commons)
+            self.__required_headers = export_required_headers(
+                target, self.__consumer_lib_commons)
             self.__target_id = export_user_id(self.target, self.headers.copy())
 
     @property
@@ -44,15 +46,6 @@ class Context:
         __headers["Referer"] = instagram_target_url.format(self.target)
         return __headers
 
-    @property
-    def __dict__(self):
-        return {
-            "target": self.target,
-            "query_hashes": json.dumps(self.query_hashes),
-            "required_headers": json.dumps(self.required_headers),
-            "target_id": self.target_id,
-        }
-
     def __propagate(self, context: dict):
         self.__target = context["target"]
         self.__query_hashes = json.loads(context["query_hashes"])
@@ -60,7 +53,14 @@ class Context:
         self.__target_id = context["target_id"]
 
     def __str__(self):
-        return json.dumps(self.__dict__)
+        return json.dumps(
+            dict(
+                target=self.target,
+                query_hashes=json.dumps(self.query_hashes),
+                required_headers=json.dumps(self.required_headers),
+                target_id=self.target_id
+            )
+        )
 
     def export(self):
         output = self.target + "_ctx.json"

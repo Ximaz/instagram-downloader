@@ -3,7 +3,7 @@ import string
 
 headers = {
     "Host": "www.instagram.com",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0",
+    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Mobile/15E148 Safari/604.1",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
     "Accept-Language": "fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3",
     "Accept-Encoding": "gzip, deflate, br",
@@ -31,3 +31,4 @@ query_kinds_regex = dict(
 x_asbd_id_regex = r"ASBD_ID='(\d+)'"
 x_ig_app_id_regex = r"instagramWebDesktopFBAppId='(\d+)'"
 window_shared_data_regex = r"^<script type=\"text\/javascript\">window\._sharedData = ({.*});<\/script>$"
+delay_between_graphql_requests = 2.5

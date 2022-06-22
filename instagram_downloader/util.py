@@ -49,7 +49,8 @@ def export_required_headers(target: str, consumer_lib_commons: str) -> dict:
         "X-Mid": None,
         "X-CSRFToken": None,
         "X-IG-App-ID": None,
-        "X-ASBD-ID": None
+        "X-ASBD-ID": None,
+        "Cookie": None
     }
     main_page = requests.get(instagram_target_url.format(
         target), headers=headers).text
@@ -75,6 +76,7 @@ def export_required_headers(target: str, consumer_lib_commons: str) -> dict:
         raise ValueError("RegEx for x-asbd-id must be reworked.")
     x_asbd_id = x_asbd_id[1]
     required_headers["X-ASBD-ID"] = x_asbd_id
+    required_headers["Cookie"] = "csrftoken={}; mid={}; ig_did={}".format(required_headers["X-CSRFToken"], required_headers["X-Mid"], window_shared_data["device_id"])
     return required_headers
 
 

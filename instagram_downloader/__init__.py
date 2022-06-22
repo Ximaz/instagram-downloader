@@ -1,2 +1,2 @@
-from .exporter import export_medias
+from .exporter import MediaExporterV2, MediaExporter, MediaItem
 from .context import Context
