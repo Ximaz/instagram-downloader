@@ -45,6 +45,7 @@ class MediaExporter:
         return links
 
     def export(self, first: int = 12, after: str = None) -> MediaItem:
+        time.sleep(delay)
         media_item = None
         headers = self.ctx.headers
         query_hash = self.ctx.query_hashes["posts"]
@@ -65,7 +66,6 @@ class MediaExporter:
             else:
                 print("Unknowned node type : {}\n{}\n\n".format(node_type, json.dumps(node)))
         media_item = MediaItem(links, after)
-        time.sleep(delay)
         return media_item
 
 class MediaExporterV2:
@@ -93,12 +93,13 @@ class MediaExporterV2:
         return headers
 
     def export(self, first: int = 3, after: str = None) -> MediaItem:
+        time.sleep(delay)
         media_item = None
         headers = self.__make_headers()
         url = "https://i.instagram.com/api/v1/feed/user/{}/?count={}".format(self.ctx.target_id if after else "{}/username".format(self.ctx.target), first)
         if after:
             url += "&max_id={}".format(after)
-        print(url, headers)
+        print(url)
         response = requests.get(url, headers=headers, allow_redirects=False)
         try:
             response = json.loads(response.text)
@@ -107,12 +108,10 @@ class MediaExporterV2:
             raise
         after = response["next_max_id"]
         links = []
-
         for node in response["items"]:
             if "carousel_media" in node:
                 links.extend(self.__handle_carousel_media(node))
             elif "image_versions2" in node:
                 links.append(self.__handle_candidate(node))
         media_item = MediaItem(links, after)
-        time.sleep(delay)
         return media_item
