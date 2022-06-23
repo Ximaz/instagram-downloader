@@ -29,7 +29,7 @@ class MediaItem:
 class MediaExporter:
     def __init__(self, ctx: Context):
         if ctx.exporter_version != 1:
-            raise ValueError("Context exporter version is not 1.")
+            raise MediaExporterInvalidVersion(1, ctx.exporter_version)
         self.__ctx = ctx
 
     @property
@@ -76,7 +76,7 @@ class MediaExporter:
 class MediaExporterV2:
     def __init__(self, ctx: Context):
         if ctx.exporter_version != 2:
-            raise ValueError("Context exporter version is not 2.")
+            raise MediaExporterInvalidVersion(2, ctx.exporter_version)
         self.__ctx = ctx
 
     @property

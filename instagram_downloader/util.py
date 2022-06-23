@@ -3,6 +3,7 @@ import json
 import random
 import requests
 from .constants import *
+from .exceptions import *
 
 
 def __int_to_base(x: int, base: int):
@@ -24,15 +25,11 @@ def __int_to_base(x: int, base: int):
 
 
 def export_consumer_lib(target: str) -> str:
-    response = requests.get(instagram_target_url.format(
-        target), headers=headers).text
+    response = requests.get(instagram_target_url.format(target), headers=headers).text
     script_url = re.search(consumer_lib_regex, response, re.M)
-
     if not script_url:
-        raise ValueError(
-            "RegEx for consumer lib commons script must be reworked.")
-    script_url = script_url[1]
-    return requests.get("{}{}".format(instagram_main_url, script_url)).text
+        raise RegexReworkException("ConsumerLibCommons")
+    return requests.get("{}{}".format(instagram_main_url, script_url[1])).text
 
 
 def generate_x_mid() -> str:
@@ -54,29 +51,23 @@ def export_required_headers(target: str, consumer_lib_commons: str) -> dict:
         "X-Instagram-AJAX": None,
         "Cookie": None
     }
-    main_page = requests.get(instagram_target_url.format(
-        target), headers=headers).text
-    window_shared_data_match = re.search(
-        window_shared_data_regex, main_page, re.M)
+    main_page = requests.get(instagram_target_url.format(target), headers=headers).text
+    window_shared_data_match = re.search(window_shared_data_regex, main_page, re.M)
 
     if not window_shared_data_match:
-        raise ValueError("RegEx for window shared data must be reworked.")
-    window_shared_data_match = window_shared_data_match[1]
-    try:
-        window_shared_data = json.loads(window_shared_data_match)
-    except json.decoder.JSONDecodeError:
-        raise ValueError("Window shared data found but wrong format.")
+        raise RegexReworkException("window._sharedData")
+    window_shared_data = json.loads(window_shared_data_match[1])
     required_headers["X-CSRFToken"] = window_shared_data["config"]["csrf_token"]
     required_headers["X-Web-Device-ID"] = window_shared_data["device_id"]
     required_headers["X-Instagram-AJAX"] = window_shared_data["rollout_hash"]
     x_ig_app_id = re.search(x_ig_app_id_regex, consumer_lib_commons, re.M)
     if not x_ig_app_id:
-        raise ValueError("RegEx for x-ig-app-id must be reworked.")
+        raise RegexReworkException("X-IG-App-ID")
     x_ig_app_id = x_ig_app_id[1]
     required_headers["X-IG-App-ID"] = x_ig_app_id
     x_asbd_id = re.search(x_asbd_id_regex, consumer_lib_commons, re.M)
     if not x_asbd_id:
-        raise ValueError("RegEx for x-asbd-id must be reworked.")
+        raise RegexReworkException("X-ASBD-ID")
     required_headers["X-ASBD-ID"] = x_asbd_id[1]
     required_headers["Cookie"] = "csrftoken={}; mid={}; ig_did={}".format(required_headers["X-CSRFToken"], required_headers["X-Mid"], required_headers["X-Web-Device-ID"])
     return required_headers

@@ -2,18 +2,19 @@ import json
 import zlib
 from .util import *
 from .constants import *
+from .exceptions import *
 
 
 class Context:
     def __init__(self, target: str, exporter_version: int = 1):
         """
         The exporter version can take 2 values :
-        - 1 : The default exporter. It uses the GraphQL API to make
-              requests with query hashes, and some variables stored in the
-              URL as JSON. It's formated the following way :
+        - 1 : The default exporter. It uses the GraphQL API to make requests with query hashes,
+              and some variables stored in the URL as JSON. It's formated the following way :
               https://www.instagram.com/graphql/query/?query_hash=X&variables=X
-        - 2 : The V2 exporter. It uses the Feed API to get content, and
-              the next cursor corresponds to a post ID. It's formated the
+
+        - 2 : The V2 exporter. It uses the Feed API to get content. The next cursor corresponds
+              to a post ID, different from ``after`` from GraphQL variables. It's formated the
               following way :
               https://i.instagram.com/api/v1/feed/user/UID/?count=X&max_id=X
 
@@ -41,7 +42,7 @@ class Context:
     @staticmethod
     def __check_exporter_version(exporter_version: int):
         if exporter_version not in (1, 2):
-            raise ValueError("Invalid exporter version was provided : {}".format(exporter_version))
+            raise ContextInvalidExporterVersion(exporter_version)
 
     @property
     def target(self):
@@ -101,9 +102,14 @@ class Context:
         stream.close()
 
     def __load(self):
+        data = None
         with open(self.context_filename, 'rb') as stream:
-            data = zlib.decompress(stream.read()).decode()
+            data = stream.read()
         stream.close()
+        try:
+            data = zlib.decompress(data).decode()
+        except zlib.error:
+            raise ContextCorrupted
         self.__propagate(json.loads(data))
 
     def __init(self):
