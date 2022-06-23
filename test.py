@@ -2,20 +2,20 @@ import os
 import json
 from instagram_downloader import *
 
-def main(ctx: Context = None, target: str = None):
-    if ctx is None and not target:
-        raise ValueError("Context and target can't be both None.")
-    if ctx is None:
-        ctx = Context(target)
-        ctx.export()
-    output = "urls.json"
+def main(target: str, after: str = ""):
     urls = []
+    ctx = Context(target)
+    output = "urls.json"
     if os.path.exists(output):
         urls = json.load(open(output, 'r'))
-    media_exporter = MediaExporter(ctx)
-    after = "QVFBS3JZbFRocU9HVF80dmxlbzhmdzc1aHJheTczRGVlVVlLclZNbXhxRGdFbFA2SF9nWjhIaHFSWVBnaS16LVVJZlFTQzcxZFk4TVF2S3hrclNuR3lpVg=="
+    if ctx.exporter_version == 1:
+        media_exporter = MediaExporter()
+    elif ctx.exporter_version == 2:
+        media_exporter = MediaExporterV2(ctx)
+    else:
+        raise ValueError("Context was alterated.")
     while True:
-        media_item = media_exporter.export(after=after)
+        media_item = media_exporter.export(first=12, after=after)
         urls.extend(media_item.urls)
         json.dump(urls, open(output, "w+"))
         if after == media_item.after:
@@ -25,7 +25,5 @@ def main(ctx: Context = None, target: str = None):
             break
 
 if __name__ == "__main__":
-    target = "kaguramiko__"
-    ctx = Context()
-    ctx.load(target)
-    main(ctx)
+    after = "QVFCQ0hJVG9RVTNabFozTXRiMkJJNUppenJqeF9CckhnMmdFbzA3OHdlSVVQb3Juc2NIdnR1WmVSWF9Yd0R2dzdUeDExTlhOXzI3YXJhZnBjSUVCaHJmYg=="
+    main("kaguramiko__", after)

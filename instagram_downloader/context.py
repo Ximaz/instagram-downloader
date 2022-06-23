@@ -1,25 +1,47 @@
 import json
+import zlib
 from .util import *
 from .constants import *
 
 
 class Context:
-    def __init__(self, target: str = None):
+    def __init__(self, target: str, exporter_version: int = 1):
+        """
+        The exporter version can take 2 values :
+        - 1 : The default exporter. It uses the GraphQL API to make
+              requests with query hashes, and some variables stored in the
+              URL as JSON. It's formated the following way :
+              https://www.instagram.com/graphql/query/?query_hash=X&variables=X
+        - 2 : The V2 exporter. It uses the Feed API to get content, and
+              the next cursor corresponds to a post ID. It's formated the
+              following way :
+              https://i.instagram.com/api/v1/feed/user/UID/?count=X&max_id=X
+
+        The context is saved as JSON dict zipped with zlib into a file formated
+        the following way :
+        {TARGET}_{EXPORTER_VERSION}_ctx.raw
+
+        """
+
         self.__target = target
+        self.__exporter_version = None
         self.__target_id = None
         self.__consumer_lib_commons = None
         self.__query_hashes = None
         self.__required_headers = None
         self.__target_id = None
 
-        # No error raised to be able to use ``load`` function.
-        if self.__target:
-            self.__consumer_lib_commons = export_consumer_lib(target)
-            self.__query_hashes = export_query_hashes(
-                self.__consumer_lib_commons)
-            self.__required_headers = export_required_headers(
-                target, self.__consumer_lib_commons)
-            self.__target_id = export_user_id(self.target, self.headers.copy())
+        self.__check_exporter_version(exporter_version)
+        self.__exporter_version = exporter_version
+        try:
+            self.__load()
+        except FileNotFoundError:
+            self.__init()
+
+    @staticmethod
+    def __check_exporter_version(exporter_version: int):
+        if exporter_version not in (1, 2):
+            raise ValueError("Invalid exporter version was provided : {}".format(exporter_version))
 
     @property
     def target(self):
@@ -38,6 +60,10 @@ class Context:
         return self.__target_id
 
     @property
+    def exporter_version(self):
+        return self.__exporter_version
+
+    @property
     def headers(self):
         __headers = headers.copy()
 
@@ -46,28 +72,44 @@ class Context:
         __headers["Referer"] = instagram_target_url.format(self.target)
         return __headers
 
+    @property
+    def context_filename(self):
+        return "{}_v{}_ctx.raw".format(self.target, self.exporter_version)
+
     def __propagate(self, context: dict):
         self.__target = context["target"]
+        self.__target_id = context["target_id"]
+        self.__check_exporter_version(context["exporter_version"])
+        self.__exporter_version = context["exporter_version"]
         self.__query_hashes = json.loads(context["query_hashes"])
         self.__required_headers = json.loads(context["required_headers"])
-        self.__target_id = context["target_id"]
 
     def __str__(self):
         return json.dumps(
             dict(
                 target=self.target,
+                target_id=self.target_id,
+                exporter_version=self.exporter_version,
                 query_hashes=json.dumps(self.query_hashes),
                 required_headers=json.dumps(self.required_headers),
-                target_id=self.target_id
             )
         )
 
-    def export(self):
-        output = self.target + "_ctx.json"
-
-        with open(output, "w+") as stream:
-            stream.write(self.__str__())
+    def __export(self):
+        with open(self.context_filename, "wb+") as stream:
+            stream.write(zlib.compress(self.__str__().encode()))
         stream.close()
 
-    def load(self, target: str):
-        self.__propagate(json.load(open(target + "_ctx.json", 'r')))
+    def __load(self):
+        with open(self.context_filename, 'rb') as stream:
+            data = zlib.decompress(stream.read())
+        stream.close()
+        self.__propagate(json.loads(data))
+
+    def __init(self):
+        self.__consumer_lib_commons = export_consumer_lib(self.target)
+        if self.__exporter_version == 1:
+            self.__query_hashes = export_query_hashes(self.__consumer_lib_commons)
+        self.__required_headers = export_required_headers(self.target, self.__consumer_lib_commons)
+        self.__target_id = export_user_id(self.target, self.headers.copy())
+        self.__export()
