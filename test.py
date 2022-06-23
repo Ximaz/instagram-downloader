@@ -9,13 +9,17 @@ def main(target: str, after: str = ""):
     if os.path.exists(output):
         urls = json.load(open(output, 'r'))
     if ctx.exporter_version == 1:
-        media_exporter = MediaExporter()
+        media_exporter = MediaExporter(ctx)
     elif ctx.exporter_version == 2:
         media_exporter = MediaExporterV2(ctx)
     else:
         raise ValueError("Context was alterated.")
     while True:
-        media_item = media_exporter.export(first=12, after=after)
+        try:
+            media_item = media_exporter.export(first=12, after=after)
+        except InstagramRateLimit as exception:
+            print(exception)
+            break
         urls.extend(media_item.urls)
         json.dump(urls, open(output, "w+"))
         if after == media_item.after:

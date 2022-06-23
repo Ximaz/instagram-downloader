@@ -3,6 +3,7 @@ import json
 import requests
 from .context import *
 from .constants import *
+from .exceptions import *
 
 class MediaItem:
     def __init__(self, urls: list, after: str = None):
@@ -27,6 +28,8 @@ class MediaItem:
 
 class MediaExporter:
     def __init__(self, ctx: Context):
+        if ctx.exporter_version != 1:
+            raise ValueError("Context exporter version is not 1.")
         self.__ctx = ctx
 
     @property
@@ -46,16 +49,18 @@ class MediaExporter:
 
     def export(self, first: int = 12, after: str = None) -> MediaItem:
         time.sleep(delay)
+        links = []
         media_item = None
         headers = self.ctx.headers
         query_hash = self.ctx.query_hashes["posts"]
         variables = dict(id=self.ctx.target_id, first=first, after=(after or ""))
         url = "{}?query_hash={}&variables={}".format(instagram_graphql_url, query_hash, json.dumps(variables).replace(' ', ''))
-        print(url)
-        response = requests.get(url, headers=headers).json()["data"]["user"]["edge_owner_to_timeline_media"]
-        after = response["page_info"]["end_cursor"]
-        links = []
+        try:
+            response = requests.get(url, headers=headers).json()["data"]["user"]["edge_owner_to_timeline_media"]
+        except json.decoder.JSONDecodeError:
+            raise InstagramRateLimit(after)
 
+        after = response["page_info"]["end_cursor"]
         for edge in response["edges"]:
             node = edge["node"]
             node_type = node["__typename"]
@@ -70,6 +75,8 @@ class MediaExporter:
 
 class MediaExporterV2:
     def __init__(self, ctx: Context):
+        if ctx.exporter_version != 2:
+            raise ValueError("Context exporter version is not 2.")
         self.__ctx = ctx
 
     @property
@@ -99,13 +106,11 @@ class MediaExporterV2:
         url = "https://i.instagram.com/api/v1/feed/user/{}/?count={}".format(self.ctx.target_id if after else "{}/username".format(self.ctx.target), first)
         if after:
             url += "&max_id={}".format(after)
-        print(url)
-        response = requests.get(url, headers=headers, allow_redirects=False)
         try:
-            response = json.loads(response.text)
-        except:
-            print(response.text)
-            raise
+            response = requests.get(url, headers=headers, allow_redirects=False).json()
+        except json.decoder.JSONDecodeError:
+            raise InstagramRateLimit(after)
+
         after = response["next_max_id"]
         links = []
         for node in response["items"]:

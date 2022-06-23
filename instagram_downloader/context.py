@@ -102,7 +102,7 @@ class Context:
 
     def __load(self):
         with open(self.context_filename, 'rb') as stream:
-            data = zlib.decompress(stream.read())
+            data = zlib.decompress(stream.read()).decode()
         stream.close()
         self.__propagate(json.loads(data))
 
