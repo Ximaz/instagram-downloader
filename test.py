@@ -2,21 +2,27 @@ import os
 import json
 from instagram_downloader import *
 
-def main(target: str, after: str = ""):
-    urls = []
-    ctx = Context(target, 2)
-    output = "urls.json"
-    if os.path.exists(output):
-        urls = json.load(open(output, 'r'))
+def build_exporter(ctx: Context):
     if ctx.exporter_version == 1:
-        media_exporter = MediaExporter(ctx)
+        return MediaExporter(ctx)
     elif ctx.exporter_version == 2:
-        media_exporter = MediaExporterV2(ctx)
+        return MediaExporterV2(ctx)
     else:
         raise ContextCorrupted
+
+def load_existing_urls(filename: str):
+    if os.path.exists(filename):
+        urls = json.load(open(filename, 'r'))
+    return urls
+
+def main(ctx: Context, after: str = ""):
+    output = "urls.json"
+    urls = load_existing_urls(output)
+    exporter = build_exporter(ctx)
+
     while True:
         try:
-            media_item = media_exporter.export(first=12, after=after)
+            media_item = exporter.export(first=12, after=after)
         except InstagramRateLimit as exception:
             print(exception)
             break
@@ -29,5 +35,7 @@ def main(target: str, after: str = ""):
             break
 
 if __name__ == "__main__":
-    after = "2384062639388294108_8345035809"
-    main("kaguramiko__", after)
+    target = "kaguramiko__"
+    ctx = Context(target, 2)
+    after = "2078880219040844479_8345035809"
+    main(ctx, after)

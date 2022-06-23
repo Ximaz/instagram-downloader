@@ -55,9 +55,11 @@ class MediaExporter:
         query_hash = self.ctx.query_hashes["posts"]
         variables = dict(id=self.ctx.target_id, first=first, after=(after or ""))
         url = "{}?query_hash={}&variables={}".format(instagram_graphql_url, query_hash, json.dumps(variables).replace(' ', ''))
+        response = requests.get(url, headers=headers)
         try:
-            response = requests.get(url, headers=headers).json()["data"]["user"]["edge_owner_to_timeline_media"]
+            response = response.json()["data"]["user"]["edge_owner_to_timeline_media"]
         except json.decoder.JSONDecodeError:
+            print(response.headers)
             raise InstagramRateLimit(after)
 
         after = response["page_info"]["end_cursor"]
@@ -106,9 +108,11 @@ class MediaExporterV2:
         url = "https://i.instagram.com/api/v1/feed/user/{}/?count={}".format(self.ctx.target_id if after else "{}/username".format(self.ctx.target), first)
         if after:
             url += "&max_id={}".format(after)
+        response = requests.get(url, headers=headers, allow_redirects=False)
         try:
-            response = requests.get(url, headers=headers, allow_redirects=False).json()
+            response = response.json()
         except json.decoder.JSONDecodeError:
+            print(response.headers)
             raise InstagramRateLimit(after)
 
         after = response["next_max_id"]

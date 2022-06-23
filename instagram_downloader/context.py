@@ -6,10 +6,10 @@ from .exceptions import *
 
 
 class Context:
-    def __init__(self, target: str, exporter_version: int = 1):
+    def __init__(self, target: str, exporter_version: int = 2):
         """
         The exporter version can take 2 values :
-        - 1 : The default exporter. It uses the GraphQL API to make requests with query hashes,
+        - 1 : The V1 exporter. It uses the GraphQL API to make requests with query hashes,
               and some variables stored in the URL as JSON. It's formated the following way :
               https://www.instagram.com/graphql/query/?query_hash=X&variables=X
 
@@ -17,6 +17,7 @@ class Context:
               to a post ID, different from ``after`` from GraphQL variables. It's formated the
               following way :
               https://i.instagram.com/api/v1/feed/user/UID/?count=X&max_id=X
+              It's the default exporter version since it does not require query hashes.
 
         The context is saved as JSON dict zipped with zlib into a file formated
         the following way :
