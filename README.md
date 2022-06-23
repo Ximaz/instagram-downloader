@@ -23,6 +23,15 @@ THe required headers are the thing Instagram looks at to tell if a request has t
 
 ``X-IG-App-ID`` and ``X-ASBD-ID`` : Their value are hard-coded in ``ConsumerLibCommons.js``. Regexes iare enough to get them.
 
+# Setup
+This is the step to follow in order to use this project :
+```bash
+git clone https://github.com/Ximaz/instagram-downloader
+cd instagram-downloader
+python3 -m pip install -r requirements.txt
+```
+Once done, you can edit the ``test.py`` to target someone and launch the script.
+
 # Ratelimits
 According to [Bibliogram Docs](https://git.sr.ht/~cadence/bibliogram-docs/tree/master/docs/Instagram%20rate%20limits.md#specifics), the Instagram's GraphQL API has a ratelimit of 200 requests for 11 minutes, which makes around 17 requests per minute, so almost a request for 4 seconds. Find the maths below :
 
