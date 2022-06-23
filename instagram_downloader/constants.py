@@ -31,5 +31,5 @@ query_kinds_regex = dict(
 )
 x_asbd_id_regex = r"ASBD_ID='(\d+)'"
 x_ig_app_id_regex = r"instagramWebDesktopFBAppId='(\d+)'"
-window_shared_data_regex = r"^<script type=\"text\/javascript\">window\._sharedData = ({.*});<\/script>$"
+window_shared_data_regex = r"^<script type=\"text\/javascript\">window\._sharedData = (\{.*\});<\/script>$"
 delay = 4
