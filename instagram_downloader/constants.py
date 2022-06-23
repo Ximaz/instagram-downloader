@@ -20,10 +20,14 @@ headers = {
     "X-Requested-With": "XMLHttpRequest",
     "X-IG-WWW-Claim": "0",
 }
+instagram_urls = dict(
+    main="https://www.instagram.com",
+    graphql="https://www.instagram.com/graphql/query/?query_hash={}&variables={}",
+    feed_api="https://i.instagram.com/api/v1/feed/user/{}/username/?count={}",
+    target="https://www.instagram.com/{}/channel/?hl=fr",
+    target_json="https://www.instagram.com/{}/?__a=1&__d=dis/"
+)
 base_36 = string.digits + string.ascii_letters
-instagram_main_url = "https://www.instagram.com"
-instagram_graphql_url = "{}/graphql/query/".format(instagram_main_url)
-instagram_target_url = instagram_main_url + "/{}/channel/?hl=fr"
 consumer_lib_regex = r"(\/static\/bundles\/(?:es6|metro)\/ConsumerLibCommons\.js\/[a-f0-9]+\.js)"
 query_kinds_regex = dict(
     posts=r"queryId:\"([a-f0-9]{32})\"",

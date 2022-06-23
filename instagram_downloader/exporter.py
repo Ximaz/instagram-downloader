@@ -1,6 +1,7 @@
 import time
 import json
 import requests
+import random
 from .context import *
 from .constants import *
 from .exceptions import *
@@ -48,18 +49,17 @@ class MediaExporter:
         return links
 
     def export(self, first: int = 12, after: str = None) -> MediaItem:
-        time.sleep(delay)
+        time.sleep(delay + (random.randint(0, 2) + random.random()))
         links = []
         media_item = None
         headers = self.ctx.headers
         query_hash = self.ctx.query_hashes["posts"]
         variables = dict(id=self.ctx.target_id, first=first, after=(after or ""))
-        url = "{}?query_hash={}&variables={}".format(instagram_graphql_url, query_hash, json.dumps(variables).replace(' ', ''))
+        url = instagram_urls["graphql"].format(query_hash, json.dumps(variables).replace(' ', ''))
         response = requests.get(url, headers=headers)
         try:
             response = response.json()["data"]["user"]["edge_owner_to_timeline_media"]
         except json.decoder.JSONDecodeError:
-            print(response.headers)
             raise InstagramRateLimit(after)
 
         after = response["page_info"]["end_cursor"]
@@ -102,17 +102,16 @@ class MediaExporterV2:
         return headers
 
     def export(self, first: int = 3, after: str = None) -> MediaItem:
-        time.sleep(delay)
+        time.sleep(delay + (random.randint(0, 2) + random.random()))
         media_item = None
         headers = self.__make_headers()
-        url = "https://i.instagram.com/api/v1/feed/user/{}/?count={}".format(self.ctx.target_id if after else "{}/username".format(self.ctx.target), first)
+        url = instagram_urls["feed_api"].format(self.ctx.target, first)
         if after:
             url += "&max_id={}".format(after)
         response = requests.get(url, headers=headers, allow_redirects=False)
         try:
             response = response.json()
         except json.decoder.JSONDecodeError:
-            print(response.headers)
             raise InstagramRateLimit(after)
 
         after = response["next_max_id"]

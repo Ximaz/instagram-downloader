@@ -25,11 +25,11 @@ def __int_to_base(x: int, base: int):
 
 
 def export_consumer_lib(target: str) -> str:
-    response = requests.get(instagram_target_url.format(target), headers=headers).text
+    response = requests.get(instagram_urls["target"].format(target), headers=headers).text
     script_url = re.search(consumer_lib_regex, response, re.M)
     if not script_url:
         raise RegexReworkException("ConsumerLibCommons")
-    return requests.get("{}{}".format(instagram_main_url, script_url[1])).text
+    return requests.get("{}{}".format(instagram_urls["main"], script_url[1])).text
 
 
 def generate_x_mid() -> str:
@@ -51,7 +51,7 @@ def export_required_headers(target: str, consumer_lib_commons: str) -> dict:
         "X-Instagram-AJAX": None,
         "Cookie": None
     }
-    main_page = requests.get(instagram_target_url.format(target), headers=headers).text
+    main_page = requests.get(instagram_urls["target"].format(target), headers=headers).text
     window_shared_data_match = re.search(window_shared_data_regex, main_page, re.M)
 
     if not window_shared_data_match:
@@ -84,5 +84,4 @@ def export_query_hashes(consumer_lib_commons: str) -> list:
 
 
 def export_user_id(target: str, headers: dict) -> str:
-    url = "{}/{}/?__a=1&__d=dis".format(instagram_main_url, target)
-    return requests.get(url, headers=headers).json()["graphql"]["user"]["id"]
+    return requests.get(instagram_urls["target_json"].format(target), headers=headers).json()["graphql"]["user"]["id"]

@@ -71,7 +71,7 @@ class Context:
 
         for name, value in self.required_headers.items():
             __headers[name.replace("_", "-")] = value
-        __headers["Referer"] = instagram_target_url.format(self.target)
+        __headers["Referer"] = instagram_urls["target"].format(self.target)
         return __headers
 
     @property
