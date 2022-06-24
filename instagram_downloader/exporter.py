@@ -11,9 +11,10 @@ def do_sleep():
 
 
 class MediaItem:
-    def __init__(self, urls: list, after: str = None):
+    def __init__(self, urls: list, after: str = None, has_next: bool = True):
         self.__urls = urls
         self.__after = after
+        self.__has_next = has_next
 
     @property
     def urls(self):
@@ -23,11 +24,16 @@ class MediaItem:
     def after(self):
         return self.__after
 
+    @property
+    def has_next(self):
+        return self.__has_next
+
     def __str__(self):
         return json.dumps(
             dict(
                 urls=json.dumps(self.urls),
-                after=self.after
+                after=self.after,
+                has_next=self.__has_next
             )
         )
 
@@ -66,7 +72,12 @@ class MediaExporter:
         except json.decoder.JSONDecodeError:
             raise InstagramRateLimit(after)
 
-        after = response["page_info"]["end_cursor"]
+        if "page_info" in response and "end_cursor" in response["page_info"]:
+            after = response["page_info"]["end_cursor"]
+            has_next = True
+        else:
+            after = None
+            has_next = False
         for edge in response["edges"]:
             node = edge["node"]
             node_type = node["__typename"]
@@ -76,7 +87,7 @@ class MediaExporter:
                 links.extend(self.__handle_graph_side_car(node))
             else:
                 print("Unknowned node type : {}\n{}\n\n".format(node_type, json.dumps(node)))
-        media_item = MediaItem(links, after)
+        media_item = MediaItem(links, after, has_next)
         return media_item
 
 class MediaExporterV2:
@@ -118,12 +129,17 @@ class MediaExporterV2:
         except json.decoder.JSONDecodeError:
             raise InstagramRateLimit(after)
 
-        after = response["next_max_id"]
+        if "next_max_id" in response:
+            after = response["next_max_id"]
+            has_next = True
+        else:
+            after = None
+            has_next = False
         links = []
         for node in response["items"]:
             if "carousel_media" in node:
                 links.extend(self.__handle_carousel_media(node))
             elif "image_versions2" in node:
                 links.append(self.__handle_candidate(node))
-        media_item = MediaItem(links, after)
+        media_item = MediaItem(links, after, has_next)
         return media_item
