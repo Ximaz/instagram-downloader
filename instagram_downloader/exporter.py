@@ -1,17 +1,21 @@
 import time
 import json
-import requests
 import random
+import requests
 from .context import *
 from .constants import *
 from .exceptions import *
 
-def do_sleep():
-    time.sleep(delay + (random.randint(1, 2) + random.random()))
+
+def do_sleep(exporter):
+    def wrapper(*args, **kwargs):
+        time.sleep(delay + (random.randint(1, 2) + random.random()))
+        return exporter(*args, **kwargs)
+    return wrapper
 
 
 class MediaItem:
-    def __init__(self, urls: list, after: str = None, has_next: bool = True):
+    def __init__(self, urls: list, after: str = "", has_next: bool = True):
         self.__urls = urls
         self.__after = after
         self.__has_next = has_next
@@ -33,9 +37,10 @@ class MediaItem:
             dict(
                 urls=json.dumps(self.urls),
                 after=self.after,
-                has_next=self.__has_next
+                has_next=self.has_next
             )
         )
+
 
 class MediaExporter:
     def __init__(self, ctx: Context):
@@ -52,32 +57,24 @@ class MediaExporter:
         return node["display_resources"][-1]["src"]
 
     def __handle_graph_side_car(self, node: dict) -> list:
-        links = node["edge_sidecar_to_children"]["edges"]
+        return [self.__handle_graph_image(e["node"]) for e in node["edge_sidecar_to_children"]["edges"]]
 
-        for i in range(len(links)):
-            links[i] = self.__handle_graph_image(links[i]["node"])
-        return links
-
-    def export(self, first: int = 12, after: str = None) -> MediaItem:
-        do_sleep()
-        links = []
-        media_item = None
-        headers = self.ctx.headers
+    @do_sleep
+    def export(self, first: int = 12, after: str = "") -> MediaItem:
         query_hash = self.ctx.query_hashes["posts"]
-        variables = dict(id=self.ctx.target_id, first=first, after=(after or ""))
-        url = instagram_urls["graphql"].format(query_hash, json.dumps(variables).replace(' ', ''))
-        response = requests.get(url, headers=headers)
+        variables = json.dumps(dict(id=self.ctx.target_id, first=first, after=after), separators=(',', ':'))
+        response = requests.get(instagram_urls["graphql"].format(query_hash, variables), headers=self.ctx.headers)
         try:
             response = response.json()["data"]["user"]["edge_owner_to_timeline_media"]
         except json.decoder.JSONDecodeError:
             raise InstagramRateLimit(after)
-
         if "page_info" in response and "end_cursor" in response["page_info"]:
             after = response["page_info"]["end_cursor"]
             has_next = True
         else:
             after = None
             has_next = False
+        links = []
         for edge in response["edges"]:
             node = edge["node"]
             node_type = node["__typename"]
@@ -86,9 +83,10 @@ class MediaExporter:
             elif node_type == "GraphSidecar":
                 links.extend(self.__handle_graph_side_car(node))
             else:
-                print("Unknowned node type : {}\n{}\n\n".format(node_type, json.dumps(node)))
-        media_item = MediaItem(links, after, has_next)
-        return media_item
+                print("Unknowned node type : {}\n{}\n\n".format(
+                    node_type, json.dumps(node)))
+        return MediaItem(links, after, has_next)
+
 
 class MediaExporterV2:
     def __init__(self, ctx: Context):
@@ -105,20 +103,15 @@ class MediaExporterV2:
         return node["image_versions2"]["candidates"][0]["url"]
 
     def __handle_carousel_media(self, node: dict) -> list:
-        links = node["carousel_media"]
-
-        for i in range(len(links)):
-            links[i] = self.__handle_candidate(links[i])
-        return links
+        return [self.__handle_candidate(n) for n in node["carousel_media"]]
 
     def __make_headers(self):
         headers = self.ctx.headers
         headers["Host"] = "i.instagram.com"
         return headers
 
-    def export(self, first: int = 3, after: str = None) -> MediaItem:
-        do_sleep()
-        media_item = None
+    @do_sleep
+    def export(self, first: int = 3, after: str = "") -> MediaItem:
         headers = self.__make_headers()
         url = instagram_urls["feed_api"].format(self.ctx.target, first)
         if after:
@@ -128,7 +121,6 @@ class MediaExporterV2:
             response = response.json()
         except json.decoder.JSONDecodeError:
             raise InstagramRateLimit(after)
-
         if "next_max_id" in response:
             after = response["next_max_id"]
             has_next = True
@@ -141,5 +133,6 @@ class MediaExporterV2:
                 links.extend(self.__handle_carousel_media(node))
             elif "image_versions2" in node:
                 links.append(self.__handle_candidate(node))
-        media_item = MediaItem(links, after, has_next)
-        return media_item
+            else:
+                print("Unknowned node type :\n{}\n\n".format(json.dumps(node)))
+        return MediaItem(links, after, has_next)

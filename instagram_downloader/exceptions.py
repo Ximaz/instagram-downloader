@@ -1,5 +1,5 @@
 class InstagramRateLimit(Exception):
-    def __init__(self, after: str = None):
+    def __init__(self, after: str = ""):
         self.__after = after
 
     @property

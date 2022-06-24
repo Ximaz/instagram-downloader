@@ -5,7 +5,7 @@ headers = {
     "Host": "www.instagram.com",
     "Origin": "https://www.instagram.com",
     "Referer": "https://www.instagram.com/",
-    "User-Agent": "TwitterBot/1.0", # "Mozilla/5.0 (iPhone; CPU iPhone OS 15_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Mobile/15E148 Safari/604.1",
+    "User-Agent": "TwitterBot/1.0",
     "Accept": "*/*",
     "Accept-Language": "fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3",
     "Accept-Encoding": "gzip, deflate, br",

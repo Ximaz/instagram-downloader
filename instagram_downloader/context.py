@@ -117,6 +117,6 @@ class Context:
         self.__consumer_lib_commons = export_consumer_lib(self.target)
         if self.__exporter_version == 1:
             self.__query_hashes = export_query_hashes(self.__consumer_lib_commons)
+            self.__target_id = export_user_id(self.target, self.headers.copy())
         self.__required_headers = export_required_headers(self.target, self.__consumer_lib_commons)
-        self.__target_id = export_user_id(self.target, self.headers.copy())
         self.__export()
