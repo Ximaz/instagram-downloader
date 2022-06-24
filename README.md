@@ -33,14 +33,13 @@ python3 -m pip install -r requirements.txt
 Once done, you can edit the ``test.py`` to target someone and launch the script.
 
 # Ratelimits
-According to [Bibliogram Docs](https://git.sr.ht/~cadence/bibliogram-docs/tree/master/docs/Instagram%20rate%20limits.md#specifics), the Instagram's GraphQL API has a ratelimit of 200 requests for 11 minutes, which makes around 17 requests per minute, so almost a request for 4 seconds. Find the maths below :
+According to [Facebook GraphQL API Documentation](https://developers.facebook.com/docs/graph-api/overview/rate-limiting#applications), which is now related to the Instagram's Graph QL API, it has a ratelimit of 200 requests per hour for one user, which makes around 3 requests per minute, so almost a request for 20 seconds. Find the maths below :
 
 ```python
->>> 200 / 11
-18.181818181818183 # 17 requests at lowest.
->>> 60 / 17
-3.5294117647058822 # 4 seconds at highest.
->>>
+>>> 200 / 60       # 200 requests for 60 minutes.
+3.3333333333333335 # 3 requests at lowest.
+>>> 60 / 3         # 60 seconds divided by 3 requests.
+20.0               # 20 seconds at highest.
 ```
 
 However, no information was found nowadays about the user page itself, the ``Context`` object was made to tackle this problem.

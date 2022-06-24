@@ -6,6 +6,10 @@ from .context import *
 from .constants import *
 from .exceptions import *
 
+def do_sleep():
+    time.sleep(delay + (random.randint(1, 2) + random.random()))
+
+
 class MediaItem:
     def __init__(self, urls: list, after: str = None):
         self.__urls = urls
@@ -49,7 +53,7 @@ class MediaExporter:
         return links
 
     def export(self, first: int = 12, after: str = None) -> MediaItem:
-        time.sleep(delay + (random.randint(0, 2) + random.random()))
+        do_sleep()
         links = []
         media_item = None
         headers = self.ctx.headers
@@ -102,7 +106,7 @@ class MediaExporterV2:
         return headers
 
     def export(self, first: int = 3, after: str = None) -> MediaItem:
-        time.sleep(delay + (random.randint(0, 2) + random.random()))
+        do_sleep()
         media_item = None
         headers = self.__make_headers()
         url = instagram_urls["feed_api"].format(self.ctx.target, first)
