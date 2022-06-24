@@ -21,6 +21,7 @@ def main(ctx: Context, after: str = ""):
     exporter = build_exporter(ctx)
 
     while True:
+        print("New request !")
         try:
             media_item = exporter.export(first=12, after=after)
         except InstagramRateLimit as exception:
@@ -35,7 +36,7 @@ def main(ctx: Context, after: str = ""):
             break
 
 if __name__ == "__main__":
-    target = "kaguramiko__"
+    after = "" # May be used in case the script breaks
+    target = "TARGET"
     ctx = Context(target, 2)
-    after = "2027720045492494327_8345035809"
     main(ctx, after)
