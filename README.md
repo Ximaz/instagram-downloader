@@ -42,6 +42,8 @@ According to [Facebook GraphQL API Documentation](https://developers.facebook.co
 20.0               # 20 seconds at highest.
 ```
 
+In order to slow the process of getting marked as bot, the sleep delay gets incremented with a random number between 1 and 2 followed by a ``random.random`` call to get a floating number than emulates a humain delay.
+
 However, no information was found nowadays about the user page itself, the ``Context`` object was made to tackle this problem.
 
 # Thanks
