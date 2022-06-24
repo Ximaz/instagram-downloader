@@ -31,6 +31,8 @@ def main(ctx: Context, after: str = ""):
         json.dump(urls, open(output, "w+"))
         if after == media_item.after:
             break
+        if not media_item.has_next:
+            break
         after = media_item.after
         if not after:
             break
