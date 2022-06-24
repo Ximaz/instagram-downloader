@@ -6,7 +6,7 @@ from .constants import *
 from .exceptions import *
 
 
-def __int_to_base(x: int, base: int):
+def __int_to_base(x: int, base: int) -> str:
     if x < 0:
         sign = -1
     elif x == 0:
@@ -21,7 +21,7 @@ def __int_to_base(x: int, base: int):
     if sign < 0:
         digits.append('-')
     digits.reverse()
-    return ''.join(digits)
+    return "".join(digits)
 
 
 def export_consumer_lib(target: str) -> str:
@@ -33,11 +33,7 @@ def export_consumer_lib(target: str) -> str:
 
 
 def generate_x_mid() -> str:
-    def random_uint32(): return random.randint(2**29, 2**32)
-    pool = ""
-    for _ in range(8):
-        pool += __int_to_base(random_uint32(), 36)
-    return pool
+    return "".join([__int_to_base(random.randint(2**29, 2**32), 36) for _ in range(8)])
 
 
 def export_required_headers(target: str, consumer_lib_commons: str) -> dict:
