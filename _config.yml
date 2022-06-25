@@ -1,6 +1,6 @@
-title: "Ximaz"
+title: "Instagram Downloader"
 email: "obvious.ly.dev@gmail.com"
-description: "My Instagram Downloader project."
+description: "A Python script to download content from Instagram without account."
 baseurl: "/instagram-downloader" # The subpath of the website
 url: "https://ximaz.github.io"   # The base hostname and protocol
 twitter_username: "_Ximaz"
