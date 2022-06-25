@@ -1,5 +1,5 @@
 # Instagram Downloader
-Instagram Downloader is an automated Python solution to let anyone download the entire Instagram content of any public account. It's main purpose is to downloads posts, but as soon as possible, stories will be available too.
+Instagram Downloader is an automated Python solution to let anyone **without an Instagram account** download the entire Instagram content of any public account. It's main purpose is to downloads posts, but as soon as possible, stories will be available too.
 
 # Automation ?
 Instagram works with many headers to prevent people doing this kind of project, and make their road as hard as possible. However, with some determination, I was able to find ways to get this kind of header an automated way. Let me explain.
