@@ -21,7 +21,7 @@ def main(ctx: Context, after: str = ""):
     exporter = build_exporter(ctx)
 
     while True:
-        print("New request !")
+        print("New request (current cursor: {}) !".format(after))
         try:
             media_item = exporter.export(first=12, after=after)
         except InstagramRateLimit as exception:
