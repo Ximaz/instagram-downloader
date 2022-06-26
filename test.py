@@ -11,6 +11,7 @@ def build_exporter(ctx: Context):
         raise ContextCorrupted
 
 def load_existing_urls(filename: str):
+    urls = []
     if os.path.exists(filename):
         urls = json.load(open(filename, 'r'))
     return urls
