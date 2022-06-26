@@ -53,14 +53,18 @@ class MediaExporter:
         return self.__ctx
 
     @staticmethod
-    def __handle_graph_image(node: dict) -> list:
+    def __handle_graph_image(node: dict) -> str:
         return node["display_resources"][-1]["src"]
 
+    @staticmethod
+    def __handle_graph_video(node: dict) -> str:
+        return node["video_url"]
+
     def __handle_graph_side_car(self, node: dict) -> list:
-        return [self.__handle_graph_image(e["node"]) for e in node["edge_sidecar_to_children"]["edges"]]
+        return [self.__handle_graph_image(e["node"]) if e["node"]["__typename"] == "GraphImage" else self.__handle_graph_video(e["node"]) for e in node["edge_sidecar_to_children"]["edges"]]
 
     @do_sleep
-    def export(self, first: int = 12, after: str = "") -> MediaItem:
+    def export(self, first: int = 100, after: str = "") -> MediaItem:
         query_hash = self.ctx.query_hashes["posts"]
         variables = json.dumps(dict(id=self.ctx.target_id, first=first, after=after), separators=(',', ':'))
         response = requests.get(instagram_urls["graphql"].format(query_hash, variables), headers=self.ctx.headers)
@@ -80,6 +84,8 @@ class MediaExporter:
             node_type = node["__typename"]
             if node_type == "GraphImage":
                 links.append(self.__handle_graph_image(node))
+            elif node_type == "GraphVideo":
+                links.append(self.__handle_graph_video(node))
             elif node_type == "GraphSidecar":
                 links.extend(self.__handle_graph_side_car(node))
             else:
@@ -111,7 +117,10 @@ class MediaExporterV2:
         return headers
 
     @do_sleep
-    def export(self, first: int = 3, after: str = "") -> MediaItem:
+    def export(self, first: int = 100, after: str = "") -> MediaItem:
+        """
+        TODO : Find a way to get video URLs.
+        """
         headers = self.__make_headers()
         url = instagram_urls["feed_api"].format(self.ctx.target, first)
         if after:
