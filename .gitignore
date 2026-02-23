@@ -1,0 +1,5 @@
+*.json
+__pycache__
+urls.txt
+*.raw
+my_test.py
